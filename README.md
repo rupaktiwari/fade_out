@@ -78,7 +78,7 @@ uv sync
 Copy `.env.example` to `.env` and fill in your own Groq API key:
 
 ```
-DATABASE_URL=postgresql://postgres:postgres@localhost:5433/palm_mind_task
+DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5433/palm_mind_task
 REDIS_URL=redis://localhost:6379
 QDRANT_URL=http://localhost:6333
 GROQ_API_KEY=your_groq_api_key_here
