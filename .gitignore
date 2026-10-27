@@ -9,6 +9,6 @@ venv/
 
 # OS/editor junk
 .DS_Store
-.vscode/test.txt
+.vscode/
 interview_process.txt
 test.txt
