@@ -167,5 +167,5 @@ curl -X POST "http://localhost:8000/chat" \
 ## Known limitations
 
 - Duplicate-booking prevention only matches on (email, date, time) — it doesn't yet check for scheduling conflicts across different people requesting the same slot.
+- Conversation history is sent to the LLM in full on every message, with no truncation or summarization — a long-running session's prompt grows unbounded until the 24-hour Redis TTL expires or the model's context window is exceeded.
 - No automated test suite; verified via manual end-to-end testing (document upload, RAG retrieval, multi-turn booking, cross-session isolation, invalid input handling).
-- No authentication or rate limiting (out of scope for this task).
