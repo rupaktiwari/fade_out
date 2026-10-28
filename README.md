@@ -10,6 +10,40 @@ Chat runs through a single endpoint that first checks whether the latest message
 
 Each conversation's history lives in Redis, keyed by a client-supplied `session_id`, so follow-up questions and multi-turn booking both work without the client having to resend prior context.
 
+**Document ingestion:**
+
+```mermaid
+flowchart LR
+    Client["Client<br/>POST /documents/upload"] --> Ingestion["ingestion.py<br/>upload_document()"]
+    Ingestion --> Extract["text_extraction.py<br/>extract_text()"]
+    Extract --> Chunk["chunking.py<br/>fixed / recursive"]
+    Chunk --> Embed["embedding_service.py<br/>MiniLM, 384-dim"]
+    Embed --> VectorStore["vector_store_service.py<br/>upsert_chunks()"]
+
+    Ingestion -.->|INSERT Document row| Postgres[("PostgreSQL<br/>documents table")]
+    VectorStore -.->|store vectors| Qdrant[("Qdrant<br/>documents collection")]
+```
+
+**Chat — booking and RAG branch from the same endpoint:**
+
+```mermaid
+flowchart TD
+    Client["Client<br/>POST /chat"] --> Chat["chat.py<br/>chat()"]
+    Chat --> Redis1["Redis<br/>get_history()"]
+    Redis1 --> Booking["booking_service.py<br/>extract_booking_intent()<br/>Groq LLM call"]
+    Booking -->|wants_booking: true| SaveBooking["booking_service.py<br/>save_booking()<br/>→ Postgres, with dedup check"]
+    Booking -->|wants_booking: false| RAG["rag_service.py<br/>① Qdrant search()<br/>② Groq llm.invoke()"]
+    SaveBooking --> Reply["chat.py<br/>build reply"]
+    RAG --> Reply
+    Reply --> Redis2["Redis<br/>append_message() x2"]
+    Redis2 --> Done["Client<br/>ChatResponse"]
+
+    classDef llm stroke:#a8541f,stroke-width:2px;
+    class Booking,RAG llm;
+```
+
+The two outlined boxes are where the app actually calls the LLM — everything else is deterministic code.
+
 ## Project structure
 
 ```
