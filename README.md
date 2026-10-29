@@ -1,4 +1,4 @@
-# Fade Out — Document RAG & Interview Booking API
+# Fade Out — A RAG
 
 A FastAPI backend for document ingestion and conversational RAG, with interview booking handled through the same chat endpoint. Documents get chunked, embedded, and stored in Qdrant; conversations are tracked per session in Redis; document metadata and bookings are stored in PostgreSQL.
 
